@@ -1,0 +1,7 @@
+[GIN-debug] GET    /ping                     --> main.main.func1 (3 handlers)
+[GIN-debug] GET    /user/:name               --> main.main.func2 (3 handlers)
+[GIN-debug] GET    /user/:name/*action       --> main.main.func3 (3 handlers)
+[GIN-debug] GET    /welcome                  --> main.main.func4 (3 handlers)
+[GIN-debug] POST   /form_post                --> main.main.func5 (3 handlers)
+[GIN-debug] Listening and serving HTTP on localhost:8090
+test ping log

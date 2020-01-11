@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-type Item struct {
-	Object     interface{}
-	Expiration int64
-}
-
 const (
 	// For use with functions that take an expiration time.
 	NoExpiration time.Duration = -1
@@ -18,7 +13,21 @@ const (
 	// passing in the same expiration duration as was given to New() or
 	// NewFrom() when the cache was created (e.g. 5 minutes.)
 	DefaultExpiration time.Duration = 0
+
+	MaxItems int64 = 200
+
 )
+
+type Item struct {
+	Object     interface{}
+	Expiration int64
+	// How long will the item live in the cache when not being accessed/kept alive.
+	sync.RWMutex
+	// Last access timestamp.
+	lastAccessedOn time.Time
+	// How often the item was accessed.
+	accessCount int64
+}
 
 /**
 判断是否过期
@@ -28,6 +37,20 @@ func (item *Item) Expired() bool {
 		return false
 	}
 	return time.Now().UnixNano() > item.Expiration
+}
+
+func(item *Item) updateAccessCount () int64 {
+	item.Lock()
+	defer item.Unlock()
+	item.accessCount += 1
+	item.lastAccessedOn = time.Now()
+	return  item.accessCount
+}
+
+func (c *cache)Count() int  {
+	c.mux.RLock()
+	defer c.mux.RUnlock()
+	return  len(c.items)
 }
 
 type Cache struct {
@@ -43,6 +66,7 @@ type cache struct {
 }
 
 func (c *cache) Set(k string,v interface{},d time.Duration)  {
+	//检查是否超过限制
 	var e int64
 	//等于默认等于创建cache 传入的过期时间
 	if d == DefaultExpiration{
@@ -67,6 +91,8 @@ func (c *cache) Get(k string)(interface{},bool)  {
 	if !found{
 		return nil,false
 	}
+	//更新次数
+	item.updateAccessCount()
 	if item.Expiration > 0 {
 		if time.Now().UnixNano() > item.Expiration{
 			return nil,false
@@ -102,11 +128,7 @@ func (c *cache) DeleteExpired(){
 	c.mux.Unlock()
 }
 
-func (c *cache)Count() int  {
-	c.mux.RLock()
-	defer c.mux.RUnlock()
-	return  len(c.items)
-}
+
 
 
 type janitor struct {

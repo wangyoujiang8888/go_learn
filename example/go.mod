@@ -12,7 +12,9 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/muesli/cache2go v0.0.0-20191019095710-4098a3aa8c94
+	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/spf13/viper v1.6.2
 	go.uber.org/dig v1.8.0 // indirect
+	go.uber.org/zap v1.10.0
 )
